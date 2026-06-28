@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Enquiry;
+use App\Models\Product;
+use App\Support\Settings;
+use Illuminate\Http\Request;
+
+class EnquiryController extends Controller
+{
+    /**
+     * Log a product enquiry and redirect the visitor to WhatsApp with a
+     * pre-filled message containing the product details and link.
+     */
+    public function whatsapp(Request $request, Product $product)
+    {
+        abort_unless($product->is_active, 404);
+
+        $size = $request->get('size');
+        $color = $request->get('color');
+        $qty = max(1, (int) $request->get('qty', 1));
+
+        $variant = array_filter([
+            'size' => $size,
+            'color' => $color,
+            'qty' => $qty,
+        ]);
+
+        Enquiry::create([
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'variant' => $variant,
+            'source' => 'whatsapp',
+            'status' => 'new',
+        ]);
+
+        $message = $this->buildMessage($product, $size, $color, $qty);
+
+        return redirect()->away(whatsapp_link($message));
+    }
+
+    protected function buildMessage(Product $product, ?string $size, ?string $color, int $qty): string
+    {
+        $lines = [];
+        $lines[] = "Hello ".Settings::get('site_name', 'Navanari').'! 👋';
+        $lines[] = "I'm interested in this product:";
+        $lines[] = '';
+        $lines[] = "🛍️ *{$product->name}*";
+
+        if ($product->sku) {
+            $lines[] = "Code: {$product->sku}";
+        }
+        if ($product->price_visible) {
+            $lines[] = 'Price: '.money($product->effective_price)
+                .($product->is_on_sale ? ' (was '.money($product->price).')' : '');
+        }
+        if ($size) {
+            $lines[] = "Size: {$size}";
+        }
+        if ($color) {
+            $lines[] = "Colour: {$color}";
+        }
+        $lines[] = "Quantity: {$qty}";
+        $lines[] = '';
+        $lines[] = 'Product link: '.route('product.show', $product);
+        $lines[] = '';
+        $lines[] = 'Could you share more details and availability?';
+
+        return implode("\n", $lines);
+    }
+}
