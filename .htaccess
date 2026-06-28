@@ -1,0 +1,24 @@
+# ----------------------------------------------------------------------
+# Navanari · shared-hosting (Hostinger/cPanel) document-root shim
+#
+# Many shared hosts serve the repository root (e.g. public_html) directly,
+# but Laravel's real entry point lives in /public. This forwards every
+# request into /public so the site works WITHOUT changing the web root.
+#
+# If you ARE able to point your domain's document root at the /public
+# folder in hPanel, this file is simply ignored — keep it either way.
+# ----------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Send everything to the Laravel public/ folder.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Block direct web access to sensitive project files if they ever sit in the
+# web root (defence in depth — requests are normally rewritten above anyway).
+<FilesMatch "^(\.env.*|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|README\.md|\.git.*)$">
+    Require all denied
+</FilesMatch>
