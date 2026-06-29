@@ -80,27 +80,34 @@
         </div>
     </div>
 
-    {{-- Mobile drawer --}}
-    <div x-show="mobile" x-cloak class="fixed inset-0 z-50 lg:hidden">
-        <div class="absolute inset-0 bg-ink/40 backdrop-blur-sm" @click="mobile=false" x-transition.opacity></div>
-        <div class="absolute left-0 top-0 h-full w-80 max-w-[85%] bg-cream shadow-2xl p-6 overflow-y-auto"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0">
-            <div class="flex items-center justify-between mb-6">
-                <span class="text-2xl font-serif font-bold text-gradient">{{ $siteName }}</span>
-                <button @click="mobile=false" class="p-2 text-rose-700"><svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg></button>
+    {{-- Mobile drawer — teleported to <body> so it escapes the header's
+         backdrop-filter/stacking context (otherwise the fixed overlay gets
+         trapped inside the header and renders behind the hero). --}}
+    <template x-teleport="body">
+        <div x-show="mobile" x-cloak class="fixed inset-0 z-[80] lg:hidden">
+            <div class="absolute inset-0 bg-ink/50 backdrop-blur-sm" @click="mobile=false"
+                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+            <div class="absolute left-0 top-0 h-full w-80 max-w-[85%] bg-cream shadow-2xl p-6 overflow-y-auto"
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition ease-in duration-250" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-2xl font-serif font-bold text-gradient">{{ $siteName }}</span>
+                    <button @click="mobile=false" class="p-2 text-rose-700" aria-label="Close menu"><svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg></button>
+                </div>
+                <nav class="space-y-1 text-ink/80 font-medium">
+                    <a href="{{ route('home') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Home</a>
+                    <a href="{{ route('shop') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Shop All</a>
+                    <p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-rose-400">Categories</p>
+                    @foreach($navCategories ?? [] as $cat)
+                        <a href="{{ route('shop', ['category' => $cat->slug]) }}" class="block rounded-xl px-4 py-2.5 hover:bg-rose-50">{{ $cat->name }}</a>
+                    @endforeach
+                    <a href="{{ route('shop', ['sale' => 1]) }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50 mt-2">Offers</a>
+                    <a href="{{ route('about') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">About</a>
+                    <a href="{{ route('contact') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Contact</a>
+                </nav>
             </div>
-            <nav class="space-y-1 text-ink/80 font-medium">
-                <a href="{{ route('home') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Home</a>
-                <a href="{{ route('shop') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Shop All</a>
-                <p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-rose-400">Categories</p>
-                @foreach($navCategories ?? [] as $cat)
-                    <a href="{{ route('shop', ['category' => $cat->slug]) }}" class="block rounded-xl px-4 py-2.5 hover:bg-rose-50">{{ $cat->name }}</a>
-                @endforeach
-                <a href="{{ route('shop', ['sale' => 1]) }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50 mt-2">Offers</a>
-                <a href="{{ route('about') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">About</a>
-                <a href="{{ route('contact') }}" class="block rounded-xl px-4 py-3 hover:bg-rose-50">Contact</a>
-            </nav>
         </div>
-    </div>
+    </template>
 </header>
 <style>[x-cloak]{display:none!important}</style>
