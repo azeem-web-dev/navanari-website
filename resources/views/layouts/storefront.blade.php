@@ -22,6 +22,17 @@
         [data-site-header].is-scrolled { background: rgba(255,255,255,.92); backdrop-filter: blur(14px); box-shadow: 0 10px 40px -12px rgba(190,24,93,.22); }
     </style>
 
+    {{-- Reveal failsafe: mark JS as active (so content hides without a flash),
+         and guarantee everything becomes visible even if app.js never runs. --}}
+    <script>
+        document.documentElement.classList.add('reveal-js');
+        window.__revealFallback = window.setTimeout(function () {
+            document.querySelectorAll('[data-reveal]').forEach(function (el) {
+                el.classList.add('is-visible');
+            });
+        }, 1800);
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>

@@ -106,8 +106,22 @@ const initHeader = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+function boot() {
+    // The inline <head> failsafe may have scheduled a reveal-all timer; cancel it
+    // because we're about to drive the reveals properly.
+    if (window.__revealFallback) {
+        clearTimeout(window.__revealFallback);
+        window.__revealFallback = null;
+    }
     initReveal();
     initCounters();
     initHeader();
-});
+}
+
+// This is a deferred module, so DOMContentLoaded has usually already fired by the
+// time it runs — run immediately when the DOM is ready, otherwise wait for it.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+} else {
+    boot();
+}
