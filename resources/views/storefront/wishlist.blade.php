@@ -12,7 +12,7 @@
 
     {{-- Empty state --}}
     <div x-show="$store.wishlist.count === 0" class="card text-center py-20 px-6 max-w-xl mx-auto">
-        <p class="text-5xl mb-4">💝</p>
+        <span class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500"><x-icon name="heart" class="h-8 w-8" /></span>
         <h3 class="font-serif text-2xl text-ink mb-2">Your wishlist is empty</h3>
         <p class="text-ink/60 mb-6">Tap the heart on any product to save it here.</p>
         <a href="{{ route('shop') }}" class="btn-primary">Start Shopping</a>

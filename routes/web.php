@@ -42,6 +42,7 @@ Route::post('/contact', [PageController::class, 'submitContact'])->name('contact
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::post('system/update', [Admin\SystemController::class, 'update'])->name('system.update');
 
     Route::resource('categories', Admin\CategoryController::class)->except('show');
     Route::resource('products', Admin\ProductController::class)->except('show');

@@ -85,7 +85,7 @@
                 </label>
             </div>
 
-            <button class="btn-primary w-full !py-4 text-base shadow-glow">✨ Install Navanari</button>
+            <button class="btn-primary w-full !py-4 text-base shadow-glow"><x-icon name="sparkles" class="h-5 w-5" /> Install Navanari</button>
         </form>
 
         <p class="text-center mt-5 text-xs text-ink/40">This installer disables itself automatically once setup is complete.</p>

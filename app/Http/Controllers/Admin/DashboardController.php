@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Enquiry;
 use App\Models\Product;
 use App\Models\Review;
+use App\Http\Controllers\Admin\SystemController;
 
 class DashboardController extends Controller
 {
@@ -34,6 +35,8 @@ class DashboardController extends Controller
             ];
         });
 
-        return view('admin.dashboard', compact('stats', 'recentEnquiries', 'pendingReviews', 'topProducts', 'chart'));
+        $pendingUpdates = SystemController::pendingUpdates();
+
+        return view('admin.dashboard', compact('stats', 'recentEnquiries', 'pendingReviews', 'topProducts', 'chart', 'pendingUpdates'));
     }
 }

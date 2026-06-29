@@ -110,6 +110,10 @@
         background-size: 1400px 100%;
     }
 
+    /* Horizontal product rails (Amazon-style) */
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+
     .hover-zoom-img { @apply transition-transform duration-[1200ms] ease-out; }
     .group:hover .hover-zoom-img { transform: scale(1.08); }
 

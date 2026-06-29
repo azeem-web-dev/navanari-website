@@ -27,10 +27,10 @@
                         @endif
                     </div>
                     @if($enquiry->customer_name || $enquiry->customer_phone || $enquiry->customer_email)
-                        <p class="mt-1 text-sm text-ink/60">
-                            {{ $enquiry->customer_name }}
-                            @if($enquiry->customer_phone) · 📞 {{ $enquiry->customer_phone }} @endif
-                            @if($enquiry->customer_email) · ✉️ {{ $enquiry->customer_email }} @endif
+                        <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink/60">
+                            @if($enquiry->customer_name)<span class="font-medium text-ink/80">{{ $enquiry->customer_name }}</span>@endif
+                            @if($enquiry->customer_phone)<span class="inline-flex items-center gap-1"><x-icon name="phone" class="h-3.5 w-3.5 text-rose-400" /> {{ $enquiry->customer_phone }}</span>@endif
+                            @if($enquiry->customer_email)<span class="inline-flex items-center gap-1"><x-icon name="mail" class="h-3.5 w-3.5 text-rose-400" /> {{ $enquiry->customer_email }}</span>@endif
                         </p>
                     @endif
                     @if($enquiry->message)<p class="mt-2 text-sm text-ink/70 bg-rose-50/50 rounded-xl px-3 py-2">{{ $enquiry->message }}</p>@endif

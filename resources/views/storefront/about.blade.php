@@ -34,12 +34,14 @@
     {{-- Values --}}
     <div class="grid sm:grid-cols-3 gap-5 mt-20">
         @foreach([
-            ['🌸','Curated with Love','Every piece is handpicked for quality, comfort and timeless style.'],
-            ['🤝','Personal Service','Chat with us on WhatsApp for styling advice and quick answers.'],
-            ['💎','Authentic Craft','Supporting artisans and authentic Indian craftsmanship.'],
+            ['heart','Curated with Love','Every piece is handpicked for quality, comfort and timeless style.'],
+            ['chat','Personal Service','Chat with us on WhatsApp for styling advice and quick answers.'],
+            ['gem','Authentic Craft','Supporting artisans and authentic Indian craftsmanship.'],
         ] as $i => $v)
             <div data-reveal data-reveal-delay="{{ $i*100 }}" class="card p-7 text-center">
-                <p class="text-4xl mb-3">{{ $v[0] }}</p>
+                <span class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-600 to-rose-500 text-white shadow-soft">
+                    <x-icon :name="$v[0]" class="h-6 w-6" :stroke="1.6" />
+                </span>
                 <h3 class="font-serif text-xl font-semibold text-ink mb-2">{{ $v[1] }}</h3>
                 <p class="text-sm text-ink/60 leading-relaxed">{{ $v[2] }}</p>
             </div>

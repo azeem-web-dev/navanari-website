@@ -20,11 +20,11 @@
         <div>
             <span class="text-2xl font-serif font-bold text-gradient">{{ $siteName }}</span>
             <p class="mt-3 text-sm text-ink/60 leading-relaxed">{{ setting('footer_note', 'Handpicked elegance, delivered with love.') }}</p>
-            <div class="mt-5 flex gap-3">
+            <div class="mt-5 flex gap-2.5">
                 @foreach(['instagram'=>'instagram_url','facebook'=>'facebook_url','youtube'=>'youtube_url','pinterest'=>'pinterest_url'] as $name => $key)
                     @if($url = setting($key))
-                        <a href="{{ $url }}" target="_blank" rel="noopener" class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white transition" aria-label="{{ $name }}">
-                            <span class="text-xs font-semibold uppercase">{{ substr($name,0,2) }}</span>
+                        <a href="{{ $url }}" target="_blank" rel="noopener" class="group flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-100 hover:bg-rose-600 hover:text-white hover:-translate-y-0.5 hover:shadow-soft transition-all" aria-label="{{ $name }}">
+                            <x-icon :name="$name" class="h-[18px] w-[18px]" />
                         </a>
                     @endif
                 @endforeach
@@ -52,10 +52,10 @@
 
         <div>
             <h4 class="font-semibold text-ink mb-4">Get in touch</h4>
-            <ul class="space-y-2.5 text-sm text-ink/60">
-                @if($p = setting('contact_phone'))<li>📞 {{ $p }}</li>@endif
-                @if($e = setting('contact_email'))<li>✉️ <a href="mailto:{{ $e }}" class="hover:text-rose-700">{{ $e }}</a></li>@endif
-                @if($ad = setting('contact_address'))<li>📍 {{ $ad }}</li>@endif
+            <ul class="space-y-3 text-sm text-ink/60">
+                @if($p = setting('contact_phone'))<li class="flex items-center gap-2.5"><x-icon name="phone" class="h-4 w-4 text-rose-500 shrink-0" />{{ $p }}</li>@endif
+                @if($e = setting('contact_email'))<li class="flex items-center gap-2.5"><x-icon name="mail" class="h-4 w-4 text-rose-500 shrink-0" /><a href="mailto:{{ $e }}" class="hover:text-rose-700">{{ $e }}</a></li>@endif
+                @if($ad = setting('contact_address'))<li class="flex items-start gap-2.5"><x-icon name="pin" class="h-4 w-4 text-rose-500 shrink-0 mt-0.5" /><span>{{ $ad }}</span></li>@endif
             </ul>
         </div>
     </div>

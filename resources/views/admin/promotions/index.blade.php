@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     <p class="text-ink/60 text-sm">Hero sliders, announcement bar & promo strips</p>
-    <a href="{{ route('admin.promotions.create') }}" class="btn-primary">＋ Add Promotion</a>
+    <a href="{{ route('admin.promotions.create') }}" class="btn-primary"><x-icon name="plus" class="h-4 w-4" /> Add Promotion</a>
 </div>
 
 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

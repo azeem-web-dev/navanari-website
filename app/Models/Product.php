@@ -57,6 +57,11 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order')->orderBy('id');
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -96,6 +101,34 @@ class Product extends Model
     public function getEffectivePriceAttribute(): float
     {
         return $this->is_on_sale ? (float) $this->sale_price : (float) $this->price;
+    }
+
+    public function getHasVariantsAttribute(): bool
+    {
+        return $this->relationLoaded('variants') ? $this->variants->isNotEmpty() : $this->variants()->exists();
+    }
+
+    /** Lowest effective price across variants (falls back to the base price). */
+    public function getPriceFromAttribute(): float
+    {
+        if ($this->has_variants) {
+            return (float) $this->variants->min(fn ($v) => $v->effective_price);
+        }
+        return $this->effective_price;
+    }
+
+    public function getPriceToAttribute(): float
+    {
+        if ($this->has_variants) {
+            return (float) $this->variants->max(fn ($v) => $v->effective_price);
+        }
+        return $this->effective_price;
+    }
+
+    /** True when variant prices differ, so the storefront shows a "from" price. */
+    public function getHasPriceRangeAttribute(): bool
+    {
+        return $this->has_variants && $this->price_from < $this->price_to;
     }
 
     public function getDiscountPercentAttribute(): ?int

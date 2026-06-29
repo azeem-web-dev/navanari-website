@@ -7,12 +7,27 @@
 @php
     $images = $product->images->pluck('url')->all();
     if (empty($images)) { $images = ['https://via.placeholder.com/800x1000?text=Navanari']; }
-    $sizes = $product->sizes ?? [];
-    $colors = $product->colors ?? [];
+
+    $hasVariants = $product->variants->isNotEmpty();
+    $variantData = $product->variants->map(fn ($v) => [
+        'id' => $v->id,
+        'size' => $v->size,
+        'color' => $v->color,
+        'price' => (float) $v->price,
+        'eff' => (float) $v->effective_price,
+        'onSale' => $v->is_on_sale,
+        'stock' => $v->stock_status,
+        'image' => $v->image_url,
+    ])->values()->all();
+
+    // Option lists: from variants when present, else from the simple JSON fields.
+    $sizes = $hasVariants ? $product->variants->pluck('size')->filter()->unique()->values()->all() : ($product->sizes ?? []);
+    $colors = $hasVariants ? $product->variants->pluck('color')->filter()->unique()->values()->all() : ($product->colors ?? []);
+
     $wishData = [
         'id'=>$product->id,'name'=>$product->name,'slug'=>$product->slug,
         'image'=>$images[0],'url'=>route('product.show',$product),
-        'price'=>$product->price_visible ? money($product->effective_price) : null,
+        'price'=>$product->price_visible ? money($product->price_from) : null,
     ];
 @endphp
 
@@ -23,14 +38,33 @@
         color: @js($colors[0] ?? ''),
         qty: 1,
         p: {{ \Illuminate\Support\Js::from($wishData) }},
+        hasVariants: {{ $hasVariants ? 'true' : 'false' }},
+        variants: {{ \Illuminate\Support\Js::from($variantData) }},
+        priceVisible: {{ $product->price_visible ? 'true' : 'false' }},
+        currency: @js(setting('currency_symbol', '₹')),
+        basePrice: {{ (float) $product->effective_price }},
+        baseRegular: {{ (float) $product->price }},
+        baseOnSale: {{ $product->is_on_sale ? 'true' : 'false' }},
+        get currentVariant(){
+            if(!this.hasVariants) return null;
+            return this.variants.find(v => (!this.size || v.size===this.size) && (!this.color || v.color===this.color)) || null;
+        },
+        get displayPrice(){ const v=this.currentVariant; return v ? v.eff : this.basePrice; },
+        get displayRegular(){ const v=this.currentVariant; return v ? v.price : this.baseRegular; },
+        get displayOnSale(){ const v=this.currentVariant; return v ? v.onSale : this.baseOnSale; },
+        get currentStock(){ const v=this.currentVariant; return v ? v.stock : @js($product->stock_status); },
+        fmt(n){ return this.currency + Number(n).toLocaleString('en-IN'); },
+        syncVariantImage(){ const v=this.currentVariant; if(v && v.image){ this.img = v.image; } },
         get enquireUrl(){
             const u = new URL('{{ route('product.enquire', $product) }}');
             if(this.size) u.searchParams.set('size', this.size);
             if(this.color) u.searchParams.set('color', this.color);
+            if(this.currentVariant) u.searchParams.set('variant', this.currentVariant.id);
             u.searchParams.set('qty', this.qty);
             return u.toString();
         }
-     }">
+     }"
+     x-effect="syncVariantImage()">
 
     {{-- Breadcrumb --}}
     <nav class="text-xs text-ink/50 mb-6 flex items-center gap-2">
@@ -77,15 +111,20 @@
                 </div>
             @endif
 
-            {{-- Price --}}
+            {{-- Price (reactive to the selected variant) --}}
             <div class="mt-5">
                 @if($product->price_visible)
-                    <div class="flex items-baseline gap-3">
-                        <span class="font-serif text-3xl font-bold text-rose-700">{{ money($product->effective_price) }}</span>
-                        @if($product->is_on_sale)
-                            <span class="text-lg text-ink/40 line-through">{{ money($product->price) }}</span>
-                            <span class="chip !bg-rose-600 !text-white">Save {{ money($product->price - $product->effective_price) }}</span>
+                    <div class="flex items-baseline gap-3 flex-wrap">
+                        @if($product->has_price_range)
+                            <span class="text-sm text-ink/40 mr-1">from</span>
                         @endif
+                        <span class="font-serif text-3xl font-bold text-rose-700" x-text="fmt(displayPrice)">{{ money($product->price_from) }}</span>
+                        <template x-if="displayOnSale">
+                            <span class="text-lg text-ink/40 line-through" x-text="fmt(displayRegular)"></span>
+                        </template>
+                        <template x-if="displayOnSale">
+                            <span class="chip !bg-rose-600 !text-white" x-text="'Save ' + fmt(displayRegular - displayPrice)"></span>
+                        </template>
                     </div>
                 @else
                     <span class="text-lg font-medium text-ink/60">Contact us for the best price</span>
@@ -149,7 +188,8 @@
                 @if($product->material)<div class="flex gap-2"><span class="text-ink/40">Material:</span><span class="font-medium">{{ $product->material }}</span></div>@endif
                 @if($product->category)<div class="flex gap-2"><span class="text-ink/40">Category:</span><a href="{{ route('shop',['category'=>$product->category->slug]) }}" class="font-medium text-rose-700">{{ $product->category->name }}</a></div>@endif
                 <div class="flex gap-2"><span class="text-ink/40">Availability:</span>
-                    <span class="font-medium {{ $product->stock_status==='out_of_stock' ? 'text-ink/50':'text-green-600' }}">{{ str($product->stock_status)->headline() }}</span>
+                    <span class="font-medium" :class="currentStock==='out_of_stock' ? 'text-ink/50' : 'text-green-600'"
+                          x-text="{'in_stock':'In Stock','out_of_stock':'Out of Stock','made_to_order':'Made to Order'}[currentStock] || 'In Stock'">{{ str($product->stock_status)->headline() }}</span>
                 </div>
             </div>
         </div>
@@ -187,7 +227,10 @@
                     <p class="mt-1 text-sm text-ink/70 leading-relaxed">{{ $review->body }}</p>
                 </div>
             @empty
-                <div class="card p-8 text-center text-ink/60">Be the first to review this product ✨</div>
+                <div class="card p-8 text-center text-ink/60">
+                    <span class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-400"><x-icon name="star-outline" class="h-6 w-6" /></span>
+                    Be the first to review this product
+                </div>
             @endforelse
         </div>
 

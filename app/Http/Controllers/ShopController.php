@@ -10,7 +10,7 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::active()->with(['images', 'category']);
+        $query = Product::active()->with(['images', 'category', 'variants']);
 
         // Keyword search across name, brand and description.
         if ($term = trim((string) $request->get('q'))) {

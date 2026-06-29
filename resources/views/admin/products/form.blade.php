@@ -67,6 +67,84 @@
                 <textarea name="image_urls" rows="2" placeholder="https://…" class="input"></textarea>
             </div>
         </div>
+
+        {{-- Variant pricing (Amazon-style) --}}
+        @php
+            $variantRows = $product->relationLoaded('variants')
+                ? $product->variants->map(fn ($v) => [
+                    '_k' => $v->id,
+                    'size' => $v->size,
+                    'color' => $v->color,
+                    'price' => $v->price,
+                    'sale_price' => $v->sale_price,
+                    'stock_status' => $v->stock_status,
+                    'sku' => $v->sku,
+                    'image' => $v->image,
+                    'note' => $v->note,
+                ])->values()->all()
+                : [];
+        @endphp
+        <div class="card p-6 space-y-4"
+             x-data="{
+                rows: {{ \Illuminate\Support\Js::from($variantRows) }},
+                add() { this.rows.push({ _k: Math.random(), size: '', color: '', price: '', sale_price: '', stock_status: 'in_stock', sku: '', image: '', note: '' }); },
+                remove(i) { this.rows.splice(i, 1); }
+             }">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="font-semibold text-ink">Variant Pricing</h2>
+                    <p class="text-xs text-ink/50 mt-0.5">Optional — give each size/colour its own price, sale, stock & image (like Amazon). Leave empty to use the base price.</p>
+                </div>
+                <button type="button" @click="add()" class="btn-outline !py-2 !px-4 text-xs shrink-0"><x-icon name="plus" class="h-4 w-4" /> Add</button>
+            </div>
+
+            <div class="space-y-3" x-show="rows.length">
+                <template x-for="(v, i) in rows" :key="v._k">
+                    <div class="rounded-2xl bg-rose-50/40 ring-1 ring-rose-100 p-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-12 gap-3">
+                            <div class="lg:col-span-2">
+                                <label class="label !text-xs">Size</label>
+                                <input :name="`variants[${i}][size]`" x-model="v.size" placeholder="M" class="input !py-2 text-sm">
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="label !text-xs">Colour</label>
+                                <input :name="`variants[${i}][color]`" x-model="v.color" placeholder="Maroon" class="input !py-2 text-sm">
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="label !text-xs">Price ₹</label>
+                                <input type="number" step="0.01" :name="`variants[${i}][price]`" x-model="v.price" placeholder="0" class="input !py-2 text-sm">
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="label !text-xs">Sale ₹</label>
+                                <input type="number" step="0.01" :name="`variants[${i}][sale_price]`" x-model="v.sale_price" placeholder="—" class="input !py-2 text-sm">
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="label !text-xs">Stock</label>
+                                <select :name="`variants[${i}][stock_status]`" x-model="v.stock_status" class="input !py-2 text-sm">
+                                    <option value="in_stock">In stock</option>
+                                    <option value="out_of_stock">Out</option>
+                                    <option value="made_to_order">To order</option>
+                                </select>
+                            </div>
+                            <div class="lg:col-span-2 flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="label !text-xs">SKU</label>
+                                    <input :name="`variants[${i}][sku]`" x-model="v.sku" placeholder="opt." class="input !py-2 text-sm">
+                                </div>
+                                <button type="button" @click="remove(i)" class="mb-1 flex h-9 w-9 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-100" aria-label="Remove variant">
+                                    <x-icon name="trash" class="h-4 w-4" />
+                                </button>
+                            </div>
+                            <div class="lg:col-span-12">
+                                <input :name="`variants[${i}][image]`" x-model="v.image" placeholder="Variant image URL (optional)" class="input !py-2 text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <p x-show="!rows.length" class="text-sm text-ink/40 py-2">No variants yet. Click “Add” to create size/colour pricing.</p>
+        </div>
     </div>
 
     {{-- Sidebar column --}}

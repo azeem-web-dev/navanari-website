@@ -21,10 +21,17 @@ class EnquiryController extends Controller
         $color = $request->get('color');
         $qty = max(1, (int) $request->get('qty', 1));
 
+        // Resolve the chosen variant (if any) for accurate pricing.
+        $variantModel = null;
+        if ($variantId = $request->get('variant')) {
+            $variantModel = $product->variants()->find($variantId);
+        }
+
         $variant = array_filter([
             'size' => $size,
             'color' => $color,
             'qty' => $qty,
+            'variant_id' => $variantModel?->id,
         ]);
 
         Enquiry::create([
@@ -35,12 +42,12 @@ class EnquiryController extends Controller
             'status' => 'new',
         ]);
 
-        $message = $this->buildMessage($product, $size, $color, $qty);
+        $message = $this->buildMessage($product, $size, $color, $qty, $variantModel);
 
         return redirect()->away(whatsapp_link($message));
     }
 
-    protected function buildMessage(Product $product, ?string $size, ?string $color, int $qty): string
+    protected function buildMessage(Product $product, ?string $size, ?string $color, int $qty, ?\App\Models\ProductVariant $variant = null): string
     {
         $lines = [];
         $lines[] = "Hello ".Settings::get('site_name', 'Navanari').'! 👋';
@@ -52,8 +59,10 @@ class EnquiryController extends Controller
             $lines[] = "Code: {$product->sku}";
         }
         if ($product->price_visible) {
-            $lines[] = 'Price: '.money($product->effective_price)
-                .($product->is_on_sale ? ' (was '.money($product->price).')' : '');
+            $unit = $variant ? $variant->effective_price : $product->effective_price;
+            $regular = $variant ? (float) $variant->price : (float) $product->price;
+            $onSale = $variant ? $variant->is_on_sale : $product->is_on_sale;
+            $lines[] = 'Price: '.money($unit).($onSale ? ' (was '.money($regular).')' : '');
         }
         if ($size) {
             $lines[] = "Size: {$size}";

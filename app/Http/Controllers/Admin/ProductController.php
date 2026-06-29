@@ -40,6 +40,7 @@ class ProductController extends Controller
         $product = Product::create($data);
 
         $this->syncImages($request, $product);
+        $this->syncVariants($request, $product);
 
         return redirect()->route('admin.products.index')->with('status', 'Product created.');
     }
@@ -47,7 +48,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         return view('admin.products.form', [
-            'product' => $product->load('images'),
+            'product' => $product->load('images', 'variants'),
             'categories' => Category::orderBy('name')->get(),
         ]);
     }
@@ -58,6 +59,7 @@ class ProductController extends Controller
         $product->update($data);
 
         $this->syncImages($request, $product);
+        $this->syncVariants($request, $product);
 
         return redirect()->route('admin.products.index')->with('status', 'Product updated.');
     }
@@ -144,6 +146,52 @@ class ProductController extends Controller
             $product->images()->create([
                 'path' => $path,
                 'is_primary' => $product->images()->count() === 0,
+            ]);
+        }
+    }
+
+    /**
+     * Replace the product's variants with the rows submitted from the admin
+     * editor. Each variant carries its own price/sale/stock/sku/image.
+     */
+    protected function syncVariants(Request $request, Product $product): void
+    {
+        $rows = $request->input('variants', []);
+        $product->variants()->delete();
+
+        if (! is_array($rows)) {
+            return;
+        }
+
+        $order = 0;
+        foreach ($rows as $row) {
+            $size = trim((string) ($row['size'] ?? ''));
+            $color = trim((string) ($row['color'] ?? ''));
+            $price = $row['price'] ?? null;
+
+            // Skip empty rows (need at least a size/colour and a price).
+            if ($size === '' && $color === '') {
+                continue;
+            }
+            if ($price === null || $price === '') {
+                $price = $product->price;
+            }
+
+            $sale = ($row['sale_price'] ?? '') !== '' ? (float) $row['sale_price'] : null;
+            if ($sale !== null && $sale >= (float) $price) {
+                $sale = null; // ignore invalid sale price
+            }
+
+            $product->variants()->create([
+                'size' => $size ?: null,
+                'color' => $color ?: null,
+                'sku' => trim((string) ($row['sku'] ?? '')) ?: null,
+                'price' => (float) $price,
+                'sale_price' => $sale,
+                'stock_status' => in_array(($row['stock_status'] ?? ''), ['in_stock', 'out_of_stock', 'made_to_order'], true) ? $row['stock_status'] : 'in_stock',
+                'image' => trim((string) ($row['image'] ?? '')) ?: null,
+                'note' => trim((string) ($row['note'] ?? '')) ?: null,
+                'sort_order' => $order++,
             ]);
         }
     }

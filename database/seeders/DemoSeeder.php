@@ -141,6 +141,21 @@ class DemoSeeder extends Seeder
                 ]);
             }
 
+            // Amazon-style per-size variant pricing (larger sizes cost a little more).
+            if (is_array($item['sizes'] ?? null)) {
+                foreach ($item['sizes'] as $si => $size) {
+                    $vPrice = $item['price'] + ($si * 200);
+                    $vSale = $item['sale'] ? $item['sale'] + ($si * 200) : null;
+                    $product->variants()->create([
+                        'size' => $size,
+                        'price' => $vPrice,
+                        'sale_price' => $vSale,
+                        'stock_status' => $si === count($item['sizes']) - 1 ? 'made_to_order' : 'in_stock',
+                        'sort_order' => $si,
+                    ]);
+                }
+            }
+
             // Deterministic 1–3 reviews per product (no random in seeders).
             $reviewCount = ($index % 3) + 1;
             foreach (array_slice($reviewers, 0, $reviewCount) as $r) {

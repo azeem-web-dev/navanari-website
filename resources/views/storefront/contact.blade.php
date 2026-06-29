@@ -16,13 +16,13 @@
                 <h2 class="font-serif text-2xl font-semibold text-ink mb-5">Reach us directly</h2>
                 <ul class="space-y-4 text-ink/75">
                     @if($p = setting('contact_phone'))
-                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700">📞</span>{{ $p }}</li>
+                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700"><x-icon name="phone" class="h-5 w-5" /></span>{{ $p }}</li>
                     @endif
                     @if($e = setting('contact_email'))
-                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700">✉️</span><a href="mailto:{{ $e }}" class="hover:text-rose-700">{{ $e }}</a></li>
+                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700"><x-icon name="mail" class="h-5 w-5" /></span><a href="mailto:{{ $e }}" class="hover:text-rose-700">{{ $e }}</a></li>
                     @endif
                     @if($a = setting('contact_address'))
-                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700">📍</span>{{ $a }}</li>
+                        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-700"><x-icon name="pin" class="h-5 w-5" /></span>{{ $a }}</li>
                     @endif
                 </ul>
                 <a href="{{ whatsapp_link('Hello '.setting('site_name','Navanari').'! I have a question.') }}" target="_blank" rel="noopener" class="btn-whatsapp w-full mt-6">

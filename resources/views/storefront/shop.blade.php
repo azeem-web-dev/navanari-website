@@ -93,7 +93,7 @@
                 <div class="mt-10">{{ $products->links() }}</div>
             @else
                 <div class="card text-center py-20 px-6" data-reveal>
-                    <p class="text-5xl mb-4">🛍️</p>
+                    <span class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500"><x-icon name="bag" class="h-8 w-8" /></span>
                     <h3 class="font-serif text-2xl text-ink mb-2">No products found</h3>
                     <p class="text-ink/60 mb-6">Try adjusting your filters or search for something else.</p>
                     <a href="{{ route('shop') }}" class="btn-primary">View All Products</a>

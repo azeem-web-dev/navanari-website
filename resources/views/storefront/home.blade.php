@@ -54,13 +54,15 @@
 <section class="container-x mt-8">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         @foreach([
-            ['✨','Curated Quality','Handpicked premium pieces'],
-            ['🚚','Pan-India Delivery', setting('shipping_note','Fast & safe shipping')],
-            ['💬','WhatsApp Support','Personal styling help'],
-            ['🔁','Easy Exchanges','Hassle-free returns'],
+            ['sparkles','Curated Quality','Handpicked premium pieces'],
+            ['truck','Pan-India Delivery', setting('shipping_note','Fast & safe shipping')],
+            ['chat','WhatsApp Support','Personal styling help'],
+            ['repeat','Easy Exchanges','Hassle-free returns'],
         ] as $i => $usp)
-            <div data-reveal data-reveal-delay="{{ $i*80 }}" class="card flex items-center gap-3 p-4">
-                <span class="text-2xl">{{ $usp[0] }}</span>
+            <div data-reveal data-reveal-delay="{{ $i*80 }}" class="card flex items-center gap-3.5 p-4">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-100 to-rose-50 text-rose-600 ring-1 ring-rose-100">
+                    <x-icon :name="$usp[0]" class="h-5 w-5" :stroke="1.7" />
+                </span>
                 <span>
                     <span class="block text-sm font-semibold text-ink">{{ $usp[1] }}</span>
                     <span class="block text-xs text-ink/50 line-clamp-1">{{ $usp[2] }}</span>
@@ -112,6 +114,15 @@
     </div>
 </section>
 @endif
+
+{{-- ============ SHOP BY CATEGORY (scrollable rails) ============ --}}
+@foreach($categoryRows as $row)
+    <x-product-row
+        :title="$row->name"
+        subtitle="Shop"
+        :products="$row->products"
+        :link="route('shop', ['category' => $row->slug])" />
+@endforeach
 
 {{-- ============ PROMO STRIP ============ --}}
 @if($stripPromo)

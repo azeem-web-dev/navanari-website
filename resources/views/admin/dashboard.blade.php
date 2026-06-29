@@ -3,6 +3,22 @@
 @section('heading', 'Dashboard')
 
 @section('content')
+@if($pendingUpdates > 0)
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-amber-50 to-rose-50 px-5 py-4 ring-1 ring-amber-200">
+        <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600"><x-icon name="sparkles" class="h-5 w-5" /></span>
+            <div>
+                <p class="font-semibold text-ink">New updates are ready to apply</p>
+                <p class="text-sm text-ink/60">A new feature was deployed. Click apply to finish setting it up — safe and instant.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('admin.system.update') }}">
+            @csrf
+            <button class="btn-primary shrink-0">Apply Updates</button>
+        </form>
+    </div>
+@endif
+
 {{-- Stat cards --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     @php
@@ -51,10 +67,10 @@
     <div class="card p-6">
         <h2 class="font-semibold text-ink mb-4">Quick Actions</h2>
         <div class="space-y-2.5">
-            <a href="{{ route('admin.products.create') }}" class="btn-primary w-full !justify-start">＋ Add Product</a>
-            <a href="{{ route('admin.categories.create') }}" class="btn-outline w-full !justify-start">＋ Add Category</a>
-            <a href="{{ route('admin.promotions.create') }}" class="btn-outline w-full !justify-start">＋ Add Promotion</a>
-            <a href="{{ route('admin.settings.edit') }}" class="btn-outline w-full !justify-start">⚙ Site Settings</a>
+            <a href="{{ route('admin.products.create') }}" class="btn-primary w-full !justify-start"><x-icon name="plus" class="h-4 w-4" /> Add Product</a>
+            <a href="{{ route('admin.categories.create') }}" class="btn-outline w-full !justify-start"><x-icon name="plus" class="h-4 w-4" /> Add Category</a>
+            <a href="{{ route('admin.promotions.create') }}" class="btn-outline w-full !justify-start"><x-icon name="plus" class="h-4 w-4" /> Add Promotion</a>
+            <a href="{{ route('admin.settings.edit') }}" class="btn-outline w-full !justify-start"><x-icon name="settings" class="h-4 w-4" /> Site Settings</a>
         </div>
     </div>
 </div>
@@ -94,7 +110,7 @@
                     </form>
                 </div>
             @empty
-                <p class="text-sm text-ink/50">No pending reviews 🎉</p>
+                <p class="flex items-center gap-2 text-sm text-ink/50"><x-icon name="check-circle" class="h-4 w-4 text-green-500" /> No pending reviews</p>
             @endforelse
         </div>
     </div>

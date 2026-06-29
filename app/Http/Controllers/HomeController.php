@@ -16,8 +16,16 @@ class HomeController extends Controller
 
         $featuredCategories = Category::active()->where('is_featured', true)->orderBy('sort_order')->get();
 
-        $featuredProducts = Product::active()->featured()->with('images')->latest()->take(8)->get();
-        $newArrivals = Product::active()->with('images')->latest()->take(8)->get();
+        // Amazon-style scrollable rows: one carousel per category.
+        $categoryRows = Category::active()
+            ->orderBy('sort_order')
+            ->with(['products' => fn ($q) => $q->active()->with('images', 'variants')->latest()->take(12)])
+            ->get()
+            ->filter(fn ($c) => $c->products->isNotEmpty())
+            ->take(4);
+
+        $featuredProducts = Product::active()->featured()->with('images', 'variants')->latest()->take(8)->get();
+        $newArrivals = Product::active()->with('images', 'variants')->latest()->take(8)->get();
 
         $topReviews = Review::approved()->with('product')->where('rating', '>=', 5)->latest()->take(6)->get();
 
@@ -28,7 +36,7 @@ class HomeController extends Controller
         ];
 
         return view('storefront.home', compact(
-            'heroSlides', 'stripPromo', 'featuredCategories',
+            'heroSlides', 'stripPromo', 'featuredCategories', 'categoryRows',
             'featuredProducts', 'newArrivals', 'topReviews', 'stats'
         ));
     }

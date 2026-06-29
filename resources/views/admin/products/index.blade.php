@@ -14,7 +14,7 @@
         </select>
         <button class="btn-outline !py-2.5">Go</button>
     </form>
-    <a href="{{ route('admin.products.create') }}" class="btn-primary shrink-0">＋ Add Product</a>
+    <a href="{{ route('admin.products.create') }}" class="btn-primary shrink-0"><x-icon name="plus" class="h-4 w-4" /> Add Product</a>
 </div>
 
 <div class="card overflow-x-auto">

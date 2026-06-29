@@ -1,4 +1,4 @@
-@props(['product', 'delay' => 0])
+@props(['product', 'delay' => 0, 'reveal' => true])
 
 @php
     $img = $product->primary_image ?: 'https://via.placeholder.com/600x750?text=Navanari';
@@ -8,11 +8,11 @@
         'slug' => $product->slug,
         'image' => $img,
         'url' => route('product.show', $product),
-        'price' => $product->price_visible ? money($product->effective_price) : null,
+        'price' => $product->price_visible ? ($product->has_price_range ? 'from '.money($product->price_from) : money($product->price_from)) : null,
     ];
 @endphp
 
-<div data-reveal data-reveal-delay="{{ $delay }}"
+<div @if($reveal) data-reveal data-reveal-delay="{{ $delay }}" @endif
      x-data="{ p: {{ \Illuminate\Support\Js::from($wishData) }} }"
      class="group card overflow-hidden hover:-translate-y-1.5 hover:shadow-glow">
     <div class="relative overflow-hidden">
@@ -59,8 +59,9 @@
         <div class="mt-2 flex items-center justify-between">
             @if($product->price_visible)
                 <div class="flex items-baseline gap-2">
-                    <span class="font-serif text-lg font-semibold text-rose-700">{{ money($product->effective_price) }}</span>
-                    @if($product->is_on_sale)
+                    @if($product->has_price_range)<span class="text-[11px] text-ink/40">from</span>@endif
+                    <span class="font-serif text-lg font-semibold text-rose-700">{{ money($product->price_from) }}</span>
+                    @if(! $product->has_variants && $product->is_on_sale)
                         <span class="text-sm text-ink/40 line-through">{{ money($product->price) }}</span>
                     @endif
                 </div>

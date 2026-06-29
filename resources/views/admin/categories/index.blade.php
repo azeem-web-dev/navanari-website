@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     <p class="text-ink/60 text-sm">{{ $categories->total() }} categories</p>
-    <a href="{{ route('admin.categories.create') }}" class="btn-primary">＋ Add Category</a>
+    <a href="{{ route('admin.categories.create') }}" class="btn-primary"><x-icon name="plus" class="h-4 w-4" /> Add Category</a>
 </div>
 
 <div class="card overflow-hidden">
