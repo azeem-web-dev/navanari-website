@@ -23,7 +23,9 @@
 /storage/pail
 # Local dev SQLite database (do not commit seeded local data)
 /database/database.sqlite
-/vendor
+# Local-dev env backup (not for the server)
+/.env.localdev
+# NOTE: vendor/ IS committed so the app runs on shared hosting without Composer.
 _ide_helper.php
 Homestead.json
 Homestead.yaml

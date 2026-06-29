@@ -16,8 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
 
-        // Share active promotions + settings with every view.
+        // Gate every request behind the one-time installer until set up,
+        // then share promotions + settings with every front-end view.
         $middleware->web(append: [
+            \App\Http\Middleware\EnsureInstalled::class,
             \App\Http\Middleware\ShareSiteData::class,
         ]);
     })

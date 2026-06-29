@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InstallController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -15,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 | Storefront (public)
 |--------------------------------------------------------------------------
 */
+// One-time web installer (auto-disables after setup).
+Route::get('/install', [InstallController::class, 'show'])->name('install');
+Route::post('/install', [InstallController::class, 'run']);
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
