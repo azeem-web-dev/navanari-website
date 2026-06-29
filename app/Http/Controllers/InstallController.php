@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * One-time web installer for shared hosting (no SSH/Composer needed on server).
@@ -22,7 +24,24 @@ class InstallController extends Controller
 
     public static function isInstalled(): bool
     {
-        return file_exists(self::lockPath());
+        // Fast path: the lock file written during install.
+        if (file_exists(self::lockPath())) {
+            return true;
+        }
+
+        // Self-healing path: the lock file lives in storage/ and some hosts wipe
+        // untracked files on every deploy. The database survives, so if the core
+        // tables are already set up we ARE installed — recreate the lock and move on.
+        try {
+            if (Schema::hasTable('settings') && Schema::hasTable('users') && Setting::query()->exists()) {
+                @file_put_contents(self::lockPath(), 'Detected existing install at '.date('c'));
+                return true;
+            }
+        } catch (\Throwable $e) {
+            // Database not reachable / not migrated yet — treat as not installed.
+        }
+
+        return false;
     }
 
     public function show()
